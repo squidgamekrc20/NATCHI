@@ -1,0 +1,947 @@
+<html><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Natchi KRC20</title>
+<link rel="icon" href="logo.png" type="image/png"> <!-- Chemin vers votre favicon -->
+<style>
+  :root {
+    --primary: #00B894;      /* Darker, more saturated teal */
+    --secondary: #55EFC4;    /* Lighter teal for accents */
+    --dark: #2D3436;         /* Dark gray for text */
+    --light: #f5f6fa;        /* Light background */
+    --gradient-start: #00B894;
+    --gradient-end: #55EFC4;
+    --text-on-dark: #FFFFFF; /* White text for dark backgrounds */
+    --text-on-light: #2D3436; /* Dark text for light backgrounds */
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    background: var(--light);
+    color: var(--dark);
+    line-height: 1.6;
+    overflow-x: hidden;
+    font-size: 16px; /* Base font size for better mobile readability */
+  }
+
+  .navbar {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 1rem;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    text-decoration: none;
+    color: var(--dark);
+  }
+
+  .logo img {
+    height: 40px;
+    width: 40px;
+    object-fit: contain; /* This ensures the image maintains its aspect ratio */
+    border-radius: 50%; /* Optional: keeps circular shape like the previous SVG */
+  }
+
+  @media (max-width: 768px) {
+    .logo img {
+      height: 32px;
+      width: 32px;
+    }
+
+    body {
+      font-size: 16px; /* Adjusted mobile font size */
+    }
+
+    h1 { 
+      font-size: 1.8rem; 
+      margin-bottom: 1.5rem;
+    }
+    
+    h2 { 
+      font-size: 1.5rem; 
+      margin-bottom: 1.2rem;
+    }
+    
+    h3 { 
+      font-size: 1.2rem; 
+      margin-bottom: 1rem;
+    }
+    
+    p { 
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+
+    section {
+      padding: 3rem 1rem; /* Improved section padding for mobile */
+    }
+
+    .card {
+      padding: 1.25rem;
+      margin: 0.75rem 0; /* Adjusted card spacing */
+    }
+
+    .tokenomics-grid,
+    .donate-options,
+    .social-grid,
+    .story-gallery {
+      grid-template-columns: 1fr; /* Ensured proper stacking */
+      gap: 1rem;
+    }
+
+    .nav-links {
+      padding: 4rem 1.5rem; /* Improved navigation usability */
+    }
+
+    .nav-links a {
+      padding: 0.75rem 1rem;
+      font-size: 1.1rem;
+    }
+  }
+
+  @media (max-width: 320px) {
+    body {
+      font-size: 14px;
+    }
+
+    section {
+      padding: 2rem 0.75rem; /* Section padding adjustments for very small screens */
+    }
+
+    .card {
+      padding: 1rem; /* Adjusted card padding */
+    }
+
+    .donate-option p,
+    span[style*="word-break: break-all"] {
+      font-size: 0.9rem;
+      word-break: break-all; /* Ensured proper address display */
+    }
+  }
+
+  .section-content {
+    width: 100%;
+    max-width: 100%;
+    padding: 0 1rem;
+    margin: 0 auto; /* Centered section content */
+  }
+
+  img {
+    max-width: 100%;
+    height: auto; /* Image responsiveness */
+  }
+
+  .nav-toggle {
+    display: none;
+  }
+
+  .nav-links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    list-style: none;
+    gap: 2rem;
+  }
+
+  .nav-links a {
+    text-decoration: none;
+    color: var(--dark);
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+  }
+
+  .nav-links a:hover {
+    background: var(--primary);
+    color: white;
+  }
+
+  section {
+    padding: 5rem 2rem;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s ease;
+  }
+
+  section.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .section-content {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    color: var(--primary);
+  }
+
+  p {
+    margin-bottom: 1.5rem;  
+    font-size: 1.1rem;      
+    line-height: 1.8;       
+  }
+
+  .gradient-bg {
+    background: linear-gradient(45deg, var(--gradient-start), var(--gradient-end));
+  }
+
+  .gradient-bg h1,
+  .gradient-bg h2,
+  .gradient-bg h3 {
+    color: var(--text-on-dark);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+
+  .card {
+    background: white;
+    padding: 2.5rem;        
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    margin: 1rem;
+    line-height: 1.8;       
+    transition: all 0.3s ease;
+  }
+
+  .gradient-bg .card {
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--text-on-light);
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  }
+
+  h2 {
+    margin-bottom: 1.5rem;  
+    font-size: 2rem;
+  }
+
+  h3 {
+    margin: 2rem 0 1rem;    
+    font-size: 1.5rem;
+  }
+
+  .social-icons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .social-icons a {
+    color: var(--primary);
+    font-size: 1.5rem;
+    transition: transform 0.3s ease;
+  }
+
+  .social-icons a:hover {
+    transform: translateY(-3px);
+  }
+
+  .meme-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+
+  @media (min-width: 769px) {
+    .meme-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .meme-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+
+    section {
+      padding: 4rem 1rem;
+      min-height: auto; 
+    }
+
+    .card {
+      padding: 1.5rem;
+      margin: 0.75rem 0;
+    }
+
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.75rem; }
+    h3 { font-size: 1.25rem; }
+    p { font-size: 1rem; }
+
+    .tokenomics-grid,
+    .donate-options,
+    .social-grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .meme-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .meme-grid svg.card {
+    width: 100%;
+    height: auto;
+    min-height: 300px; 
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    padding: 1.5rem;
+  }
+
+  .meme-grid svg.card:hover {
+    transform: scale(1.1); 
+    z-index: 2;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  }
+
+  .meme-grid svg text {
+    font-size: 24px; 
+    font-weight: bold;
+  }
+
+  .roadmap-timeline {
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .timeline-item {
+    padding: 2rem;          
+    margin: 1.5rem 0;       
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    position: relative;
+    line-height: 1.8;
+    transition: all 0.3s ease;
+  }
+
+  .timeline-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  }
+
+  .timeline-item.current {
+    border: 2px solid var(--primary);
+    background: rgba(73, 233, 203, 0.1);
+    position: relative;
+  }
+
+  .timeline-item.current::after {
+    content: "CURRENT PHASE";
+    position: absolute;
+    top: -12px;
+    right: 20px;
+    background: var(--primary);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: bold;
+  }
+
+  .tokenomics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    text-align: center;
+  }
+
+  .tokenomics-item {
+    padding: 2rem;          
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--text-on-light);
+    box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+    line-height: 1.8;
+    transition: all 0.3s ease;
+  }
+
+  .tokenomics-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  }
+
+  .tokenomics-item h3 {
+    color: var(--primary);
+    margin-bottom: 1rem;
+  }
+
+  .how-to-buy-steps {
+    counter-reset: step;
+  }
+
+  .step {
+    position: relative;
+    padding: 1.5rem 1.5rem 1.5rem 3.5rem;  
+    margin: 1.5rem 0;                    
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    line-height: 1.8;
+  }
+
+  .step::before {
+    counter-increment: step;
+    content: counter(step);
+    position: absolute;
+    left: 1rem;
+    color: var(--primary);
+    font-weight: bold;
+    font-size: 1.5rem;
+  }
+
+  .donate-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .donate-option {
+    text-align: center;
+    padding: 2.5rem;        
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+    line-height: 1.8;
+    transition: all 0.3s ease;
+  }
+
+  .donate-option:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  }
+
+  .social-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .social-item {
+    padding: 3rem 2rem;
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--text-on-light);
+    box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+    text-decoration: none;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .social-item:hover {
+    transform: translateY(-10px);
+  }
+
+  .social-item svg {
+    margin-bottom: 1rem;
+    transition: transform 0.3s ease;
+  }
+
+  .social-item:hover svg {
+    transform: scale(1.1);
+  }
+
+  ul li {
+    margin-bottom: 1rem;    
+    line-height: 1.8;
+  }
+
+  .legal-notice {
+    background: var(--light);
+    padding: 2rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--dark);
+    opacity: 0.8;
+    border-top: 1px solid rgba(0,0,0,0.1);
+  }
+
+  .legal-notice p {
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 768px) {
+    .nav-toggle {
+      display: block;
+      position: absolute;
+      right: 1rem;
+      top: 1rem;
+      z-index: 1001;
+    }
+
+    .nav-links {
+      position: fixed;
+      top: 0;
+      right: -100%;
+      height: 100vh;
+      width: 80%;
+      max-width: 300px;
+      background: white;
+      flex-direction: column;
+      padding: 5rem 2rem;
+      transition: all 0.3s ease;
+    }
+
+    .nav-links.active {
+      right: 0;
+    }
+
+    .section-content {
+      padding: 1rem;
+    }
+  }
+
+  @media (min-width: 769px) and (max-width: 1024px) {
+    .meme-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  .story-gallery {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+
+  @media (max-width: 768px) {
+    .story-gallery {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .story-gallery {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .story-gallery svg.card {
+    width: 100%;
+    height: auto;
+    min-height: 300px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    padding: 1.5rem;
+  }
+
+  .story-gallery svg.card:hover {
+    transform: scale(1.1);
+    z-index: 2;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="#" class="logo">
+    <img src="logo.png" alt="CryptoProject logo" width="40" height="40">
+  </a>
+  <button class="nav-toggle">☰</button>
+  <ul class="nav-links">
+    <li><a href="#fundraising">Fund Raising</a></li>
+    <li><a href="#story">Story</a></li>
+    <li><a href="#tokenomics">Tokenomics</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#howtobuy">How to Buy</a></li>
+    <li><a href="#donate">Donate</a></li>
+    <li><a href="#socials">Socials</a></li>
+    <li><a href="#memes">Memes</a></li>
+  </ul>
+</nav>
+
+<section id="fundraising" class="gradient-bg">
+  <div class="section-content">
+    <div class="image-container" style="text-align: center;">
+      <img src="NATCHI_BANNER_2.png" alt="Fund Raising" style="width: 400px; height: 200px; object-fit: cover;">
+    </div>
+    <h1>Fund Raising for CEX Listing</h1>
+    <div class="card">
+    <h2>Help Us List $NATCHI Token</h2>
+    
+    <p style="margin-bottom: 1.5rem;">
+        We're conducting this fundraising campaign to list $NATCHI - our fair-launched community token with no pre-mint - on major centralized exchanges (CEX).
+    </p>
+
+    <p style="margin-bottom: 1.5rem;">
+        As a truly community-driven project, we're reaching out to our investors and supporters to help make this listing possible.
+    </p>
+
+    <p style="margin-bottom: 1.5rem; font-weight: bold; font-size: 1.1em;">
+        Our fundraising goal needs to exceed 20,000 USD to meet the minimum listing requirements for popular CEX platforms.
+    </p>
+
+    <p style="margin-top: 1rem; font-weight: bold;">To participate in this fundraising, simply send $KAS or $NATCHI to this address:<br>
+    <span style="color: var(--primary); word-break: break-all; display: block; margin-top: 0.5rem; padding: 1rem; background: rgba(0,0,0,0.05); border-radius: 8px;">x000000000</span>
+    </p>
+
+
+      <div class="reward-info card" style="margin-top: 2rem; background: rgba(255,255,255,0.95);">
+        <h3 style="color: var(--primary); margin-bottom: 1rem;">Exclusive Rewards for Donors</h3>
+        <ul style="list-style: none; padding: 0;">
+          <li style="margin-bottom: 1rem;">
+            <strong>🪙 $NATCEX Tokens:</strong> All donors will receive $NATCEX tokens proportional to their contribution. Distribution will begin once our listing goal is reached.
+          </li>
+          <li style="margin-bottom: 1rem;">
+            <strong>🎨 Exclusive NFTs:</strong> Donors will also receive exclusive NATCHI NFTs once NFT support is integrated into the KASPA blockchain.
+          </li>
+          <li style="margin-bottom: 1rem;">
+            <strong>🌐 Exclusive Launch:</strong> After token distribution, dedicated website and social media channels for $NATCEX will be launched.
+          </li>
+          <li style="margin-bottom: 1rem;">
+            <strong>🔥 Token Burns:</strong> All undistributed tokens will be sent to a burn wallet, increasing scarcity.
+          </li>
+        </ul>
+      </div>
+
+      
+    </div>
+  </div>
+</section>
+
+<section id="story">
+  <div class="section-content">
+    <h1>Our Story</h1>
+    <div class="card">
+      <h2>What is Natchi?</h2>
+      <p>Natchi is the Japanese sister of Nacho, named after the beloved cat of Shai Wyborski, a key figure in the Kaspa ecosystem. This project is a tribute to Shai and his cat, Natchi, and stands as a celebration of the cultural richness and innovation within the Asian crypto community.</p>
+      <p>But Natchi is more than just a memecoin. It serves as a symbol of unity and collaboration between Eastern and Western philosophies in the Kaspa network, showcasing the possibilities that decentralized technology can offer. As the Kasplex protocol evolves, Natchi aims to complement its counterpart, Nacho, by bringing a unique perspective that honors tradition while embracing innovation.</p>
+      <div style="margin-top: 2rem;">
+        <strong>Official KRC20 Ticker:</strong> NATCHI
+      </div>
+    </div>
+    <div class="story-gallery">
+      <svg class="card" viewBox="0 0 200 200">
+        <rect width="200" height="200" fill="#f0f0f0"/>
+        <text x="100" y="100" text-anchor="middle" fill="#666">Story 1</text>
+        <image href="story1.jpg" x="0" y="0" width="200" height="200" />
+      </svg>
+      <svg class="card" viewBox="0 0 200 200">
+        <rect width="200" height="200" fill="#f0f0f0"/>
+        <text x="100" y="100" text-anchor="middle" fill="#666">Story 2</text>
+        <image href="story2.jpg" x="0" y="0" width="200" height="200" />
+      </svg>
+      <svg class="card" viewBox="0 0 200 200">
+        <rect width="200" height="200" fill="#f0f0f0"/>
+        <text x="100" y="100" text-anchor="middle" fill="#666">Story 3</text>
+        <image href="story3.jpg" x="0" y="0" width="200" height="200" />
+      </svg>
+    </div>
+  </div>
+</section>
+
+<section id="tokenomics" class="gradient-bg">
+  <div class="section-content">
+    <h1>Tokenomics</h1>
+    <div class="tokenomics-grid">
+      <div class="tokenomics-item">
+        <h3>Total Supply</h3>
+        <p>138,000,000 NATCHI</p>
+      </div>
+      <div class="tokenomics-item">
+        <h3>Fair Launch</h3>
+        <p>100%</p>
+      </div>
+      <div class="tokenomics-item">
+        <h3>Community Driven</h3>
+        <p>100%</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="roadmap">
+  <div class="section-content">
+    <h1>Roadmap</h1>
+    <div class="roadmap-timeline">
+      <div class="timeline-item">
+        <h3>Phase 1: Launch ✓</h3>
+        <ul style="list-style: none; padding: 0;">
+          <li style="margin: 10px 0;">🚀 Fair Launch of NATCHI</li>
+          <li style="margin: 10px 0;">💫 Launch on KSPR_BOT</li>
+          <li style="margin: 10px 0;">👥 Initial Community Building</li>
+        </ul>
+      </div>
+      
+      <div class="timeline-item current">
+        <h3>Phase 2: Fund Raising</h3>
+        <ul style="list-style: none; padding: 0;">
+          <li style="margin: 10px 0;">💰 Community Fund Raising Campaign</li>
+          <li style="margin: 10px 0;">🎁 NATCEX Token Distribution</li>
+          <li style="margin: 10px 0;">🎨 Exclusive NFT Collection Access</li>
+        </ul>
+      </div>
+
+      <div class="timeline-item">
+        <h3>Phase 3: CEX Listing</h3>
+        <ul style="list-style: none; padding: 0;">
+          <li style="margin: 10px 0;">📈 Major CEX Listings</li>
+          <li style="margin: 10px 0;">🌍 Global Market Expansion</li>
+          <li style="margin: 10px 0;">🎯 Rapid Growth to $100M MCAP</li>
+        </ul>
+      </div>
+
+      <div class="timeline-item">
+        <h3>Our Ultimate Vision</h3>
+        <p style="font-size: 1.2rem; font-weight: bold; color: var(--primary);">
+          Reach $100M Market Cap with the Strongest KRC20 Community
+        </p>
+        <div style="display: flex; justify-content: space-between; margin-top: 1rem;">
+          <div style="text-align: center;">
+            <div style="color: var(--primary); font-weight: bold;">$10M</div>
+            <small>First Goal</small>
+          </div>
+          <div style="text-align: center;">
+            <div style="color: var(--primary); font-weight: bold;">$50M</div>
+            <small>Mid Goal</small>
+          </div>
+          <div style="text-align: center;">
+            <div style="color: var(--primary); font-weight: bold;">$100M</div>
+            <small>Ultimate Goal</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="howtobuy" class="gradient-bg">
+  <div class="section-content">
+    <h1>How to Buy</h1>
+    <div class="how-to-buy-steps">
+      <div class="card" style="text-align: center; padding: 3rem;">
+        <h2 style="color: var(--primary); margin-bottom: 2rem;">Available Trading Platforms</h2>
+        
+        <div class="step" style="text-align: left;">
+          <h3>🤖 KSPR Bot on Telegram</h3>
+          <p>Currently available on KSPR Bot Decentralized Exchange (DEX)</p>
+        </div>
+        
+        <div class="step" style="text-align: left;">
+          <h3>📈 Centralized Exchanges</h3>
+          <p>Popular crypto exchanges (Coming soon)</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="donate">
+  <div class="section-content">
+    <h1>Donate</h1>
+    <div class="donate-options">
+      <div class="donate-option">
+        <h3>Kaspa Address</h3>
+        <p>kaspa:qr1234...5678</p>
+        <p style="margin-top: 1rem; font-style: italic;">Thank you for your support! Your contribution helps us grab a coffee or two.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="socials" class="gradient-bg">
+  <div class="section-content">
+    <h1>Join Our Community</h1>
+    <div class="social-grid">
+      <a href="https://x.com/Natchikrc20" class="social-item" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 24 24" width="48" height="48" fill="var(--primary)">
+          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+        </svg>
+        <h3>Twitter</h3>
+      </a>
+      <a href="https://t.me/natchiofficial" class="social-item" target="_blank" rel="noopener noreferrer" >
+        <svg viewBox="0 0 24 24" width="48" height="48" fill="var(--primary)">
+          <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+        </svg>
+        <h3>Telegram</h3>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section id="memes">
+  <div class="section-content">
+    <h1>Meme Gallery</h1>
+    <div class="meme-grid">
+      <svg class="card" viewBox="0 0 200 200">
+        <rect width="200" height="200" fill="#f0f0f0"/>
+    <image href="meme1.jpg" width="180" height="180" x="10" y="10" preserveAspectRatio="xMidYMid meet"/>
+      </svg>
+      <svg class="card" viewBox="0 0 200 200">
+        <rect width="200" height="200" fill="#f0f0f0"/>
+    <image href="meme2.jpg" width="180" height="180" x="10" y="10" preserveAspectRatio="xMidYMid meet"/>
+      </svg>
+      <svg class="card" viewBox="0 0 200 200">
+        <rect width="200" height="200" fill="#f0f0f0"/>
+    <image href="meme3.jpg" width="180" height="180" x="10" y="10" preserveAspectRatio="xMidYMid meet"/>
+      </svg>
+      <svg class="card" viewBox="0 0 200 200">
+        <rect width="200" height="200" fill="#f0f0f0"/>
+    <image href="meme4.jpg" width="180" height="180" x="10" y="10" preserveAspectRatio="xMidYMid meet"/>
+      </svg>
+      <svg class="card" viewBox="0 0 200 200">
+        <rect width="200" height="200" fill="#f0f0f0"/>
+    <image href="meme5.jpg" width="180" height="180" x="10" y="10" preserveAspectRatio="xMidYMid meet"/>
+      </svg>
+      <svg class="card" viewBox="0 0 200 200">
+        <rect width="200" height="200" fill="#f0f0f0"/>
+    <image href="meme6.jpg" width="180" height="180" x="10" y="10" preserveAspectRatio="xMidYMid meet"/>
+      </svg>
+      <svg class="card" viewBox="0 0 200 200">
+        <rect width="200" height="200" fill="#f0f0f0"/>
+    <image href="meme7.jpg" width="180" height="180" x="10" y="10" preserveAspectRatio="xMidYMid meet"/>
+      </svg>
+      <svg class="card" viewBox="0 0 200 200">
+        <rect width="200" height="200" fill="#f0f0f0"/>
+    <image href="meme8.jpg" width="180" height="180" x="10" y="10" preserveAspectRatio="xMidYMid meet"/>
+      </svg>
+      <svg class="card" viewBox="0 0 200 200">
+        <rect width="200" height="200" fill="#f0f0f0"/>
+    <image href="meme9.jpg" width="180" height="180" x="10" y="10" preserveAspectRatio="xMidYMid meet"/>
+      </svg>
+      <svg class="card" viewBox="0 0 200 200">
+        <rect width="200" height="200" fill="#f0f0f0"/>
+    <image href="meme10.jpg" width="180" height="180" x="10" y="10" preserveAspectRatio="xMidYMid meet"/>
+      </svg>
+      <svg class="card" viewBox="0 0 200 200">
+        <rect width="200" height="200" fill="#f0f0f0"/>
+    <image href="meme11.jpg" width="180" height="180" x="10" y="10" preserveAspectRatio="xMidYMid meet"/>
+      </svg>
+      <svg class="card" viewBox="0 0 200 200">
+        <rect width="200" height="200" fill="#f0f0f0"/>
+    <image href="meme12.jpg" width="180" height="180" x="10" y="10" preserveAspectRatio="xMidYMid meet"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+  <div class="legal-notice">
+    <p>
+      Created by Natchi KRC20 Team © 2024
+    </p>
+  </div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Debounced scroll handler for navbar
+  let scrollTimeout;
+  const navbar = document.querySelector('.navbar');
+  
+  window.addEventListener('scroll', () => {
+    if (scrollTimeout) {
+      window.cancelAnimationFrame(scrollTimeout);
+    }
+    
+    scrollTimeout = window.requestAnimationFrame(() => {
+      if (window.scrollY > 50) {
+        navbar.classList.add('scrolled');
+      } else {
+        navbar.classList.remove('scrolled');
+      }
+    });
+  }, { passive: true });
+
+  // Optimized mobile menu
+  const navToggle = document.querySelector('.nav-toggle');
+  const navLinks = document.querySelector('.nav-links');
+  
+  navToggle.addEventListener('click', () => {
+    navLinks.classList.toggle('active');
+  });
+
+  // Close mobile menu when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!navLinks.contains(e.target) && !navToggle.contains(e.target)) {
+      navLinks.classList.remove('active');
+    }
+  });
+});
+
+// Smooth scroll for navigation links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function (e) {
+    e.preventDefault();
+    document.querySelector(this.getAttribute('href')).scrollIntoView({
+      behavior: 'smooth'
+    });
+    if (window.innerWidth <= 768) {
+      document.querySelector('.nav-links').classList.remove('active');
+    }
+  });
+});
+
+// Intersection Observer for smooth section reveals
+const observerOptions = {
+  threshold: 0.1
+};
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, observerOptions);
+
+document.querySelectorAll('section').forEach(section => {
+  observer.observe(section);
+});
+</script>
+
+</body>
+</html>
